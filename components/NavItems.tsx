@@ -1,0 +1,28 @@
+'use client'
+import { NAV_ITEMS } from "@/lib/constants"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+
+const NavItems = () => {
+    const pathname = usePathname();
+    const isActive = (href: string) => {
+        if(href=='/')return pathname==='/';//If we don't add this, all paths will be active since they start with '/'
+        return pathname?.startsWith(href);
+    }
+  return (
+    <ul className="flex flex-col sm:flex-row p-2 gap-3 sm:gap-10 font-medium">
+        {NAV_ITEMS.map(({href, title}) => (
+            <li key={href}>
+                <Link href={href} className={`hover:text-yellow-500 transition-colors ${
+                    isActive(href)? 'text-gray-100':''
+                }`}>
+                    {title}
+                </Link> 
+            </li>
+        
+        ))}
+    </ul>
+  )
+}
+
+export default NavItems
