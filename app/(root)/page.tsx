@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button"
 
 const Home = () => {
   return (
-    <div className="flex justify-center ">
+    <div className="flex min-h-screen home-wrapper">
       <Button>Click Me</Button>
       Home</div>
   )
