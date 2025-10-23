@@ -4,10 +4,14 @@ import FooterLink from "@/components/forms/FooterLink";
 import InputField from "@/components/forms/InputField";
 import SelectField from "@/components/forms/SelectField";
 import { Button } from "@/components/ui/button";
+import { signUpwithEmail } from "@/lib/actions/auth.actions";
 import { INVESTMENT_GOALS, PREFERRED_INDUSTRIES, RISK_TOLERANCE_OPTIONS } from "@/lib/constants";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form"
 
 const SignUp = () => {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -27,10 +31,13 @@ const SignUp = () => {
 
   const onSubmit =async (data : SignUpFormData)=>{
     try{
-      console.log('Form Data:', data);
-      // Handle form submission logic here
+      const result =await signUpwithEmail(data);
+      if(result?.success)router.push('/');
     } catch (error){
       console.error('Error submitting form:', error);
+      toast.error('Sign up failed',{
+        description: error instanceof Error ? error.message : 'An unexpected error occurred.',      
+      })
     }
   }
   return (

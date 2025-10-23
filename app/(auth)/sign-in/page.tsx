@@ -4,6 +4,9 @@ import InputField from "@/components/forms/InputField";
 import FooterLink from "@/components/forms/FooterLink";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
+import { signInwithEmail } from "@/lib/actions/auth.actions";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface SignInFormData {
   email: string;
@@ -11,6 +14,7 @@ interface SignInFormData {
 }
 
 const SignIn = () => {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -25,10 +29,18 @@ const SignIn = () => {
 
   const onSubmit = async (data: SignInFormData) => {
     try {
-      console.log("Sign In Data:", data);
+      const result = await signInwithEmail(data);
+      if(result.success) router.push('/');
+       else {
+      // Handle failed login
+      toast.error("Failed to sign in", {
+        description: result?.message || "Invalid email or password"
+      });
+    }
       // TODO: Add actual sign-in logic (API call / auth)
     } catch (error) {
-      console.error("Error signing in:", error);
+      console.log("Error signing in:", error);
+      toast.error("Failed to sign in. Please try again.");
     }
   };
 
@@ -77,7 +89,6 @@ const SignIn = () => {
         >
           {isSubmitting ? "Signing In..." : "Sign In"}
         </Button>
-
         {/* Footer Link */}
         <FooterLink
           text="Don’t have an account?"
