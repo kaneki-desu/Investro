@@ -215,6 +215,16 @@ declare global {
         threshold: number;
         changePercent?: number;
     };
+    type Article = {
+      id: string | number | null;
+      url: string | null;
+      headline: string | null;
+      source: string | null;
+      datetime: string; // ISO
+      summary?: string | null;
+      related?: string | null;
+    };
+
 }
 
 export {};

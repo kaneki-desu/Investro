@@ -1,8 +1,6 @@
 'use server'
 import { auth } from "@/lib/better-auth/auth";
 import { inngest } from "@/lib/inngest/client";
-import { success } from "better-auth";
-import { err } from "inngest/types";
 import { headers } from "next/headers";
 export const signUpwithEmail = async ({email, password, fullName, riskTolerance, investmentGoals, country , preferredIndustry}: SignUpFormData)=>{
     try {

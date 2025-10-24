@@ -53,7 +53,7 @@ News data to summarize:
 {{newsData}}
 
 CRITICAL FORMATTING REQUIREMENTS:
-- Return ONLY clean HTML content with NO markdown, NO code blocks, NO backticks
+- Return ONLY clean HTML content with NO markdown, NO code blocks, NO backticks 
 - Structure content with clear sections using proper HTML headings and paragraphs
 - Use these specific CSS classes and styles to match the email template:
 
