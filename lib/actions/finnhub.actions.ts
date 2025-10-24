@@ -1,6 +1,8 @@
 "use server";
 
 import { getDateRange, validateArticle, formatArticle } from "@/lib/utils";
+import { cache } from "react";
+import { POPULAR_STOCK_SYMBOLS } from "../constants";
 
 const FINNHUB_BASE_URL = "https://finnhub.io/api/v1";
 const FINNHUB_API_KEY = process.env.NEXT_PUBLIC_FINNHUB_API_KEY!;
@@ -85,3 +87,56 @@ export async function getNews(symbols?: string[]) {
     throw new Error("Failed to fetch news");
   }
 }
+
+export const searchStocks=  cache(async(query: string) : Promise<StockWithWatchlistStatus[]>=> {
+  try {
+    if (!query.trim()) {
+      const results = await Promise.all(
+      POPULAR_STOCK_SYMBOLS.map(async (symbol) => {
+        try {
+          const url = `${FINNHUB_BASE_URL}/stock/profile2?symbol=${symbol}&token=${FINNHUB_API_KEY}`;
+          const data = await fetchJSON<any>(url, 3600); // revalidate every hour
+          return {
+            symbol,
+            name: data.name || "N/A",
+            // logo: data.logo || null,
+            type: "Stock",
+            exchange: data.exchange || "N/A"
+          };
+        } catch (error) {
+          console.error(`Error fetching ${symbol}:`, error);
+          return null;
+        }
+      })
+    );
+
+    // Filter out failed or empty entries
+    return results.filter((x): x is StockWithWatchlistStatus => x !== null);
+    }
+
+    const url = `${FINNHUB_BASE_URL}/search?q=${encodeURIComponent(query)}&token=${FINNHUB_API_KEY}`;
+    const data = await fetchJSON<{ result: any[] }>(url, 300);
+    console.log('Raw search data:', data);
+    const results = (data?.result || [])
+      .filter(
+        (item) =>
+          item.symbol &&
+          item.displaySymbol &&
+          item.description &&
+          !item.symbol.includes('.')
+      )
+      .slice(0, 10)
+      .map<StockWithWatchlistStatus>((item) => ({
+        symbol: item.symbol,
+        name: item.description,
+        type: item.type || 'Stock',
+        exchange: item.exchange || 'N/A',
+        isInWatchlist: false,
+      }));
+
+    return results;
+  } catch (error) {
+    console.error("Error searching stocks:", error);
+    return [];
+  }
+})
