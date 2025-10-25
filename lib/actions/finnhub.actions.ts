@@ -31,8 +31,6 @@ export async function getNews(symbols?: string[]) {
     // If user has watchlist symbols
     if (cleanSymbols && cleanSymbols.length > 0) {
       const perSymbolArticles: Record<string, RawNewsArticle[]> = {};
-      let round = 0;
-
       await Promise.all(
         cleanSymbols.map(async (sym) => {
           try {
@@ -95,7 +93,8 @@ export const searchStocks=  cache(async(query: string) : Promise<StockWithWatchl
       POPULAR_STOCK_SYMBOLS.map(async (symbol) => {
         try {
           const url = `${FINNHUB_BASE_URL}/stock/profile2?symbol=${symbol}&token=${FINNHUB_API_KEY}`;
-          const data = await fetchJSON<any>(url, 3600); // revalidate every hour
+          const data = await fetchJSON<{name:string,symbol:string,exchange:string}>(url, 3600); // revalidate every hour
+
           return {
             symbol,
             name: data.name || "N/A",
@@ -115,8 +114,7 @@ export const searchStocks=  cache(async(query: string) : Promise<StockWithWatchl
     }
 
     const url = `${FINNHUB_BASE_URL}/search?q=${encodeURIComponent(query)}&token=${FINNHUB_API_KEY}`;
-    const data = await fetchJSON<{ result: any[] }>(url, 300);
-    console.log('Raw search data:', data);
+    const data = await fetchJSON<FinnhubSearchResponse>(url, 300);
     const results = (data?.result || [])
       .filter(
         (item) =>
@@ -126,7 +124,7 @@ export const searchStocks=  cache(async(query: string) : Promise<StockWithWatchl
           !item.symbol.includes('.')
       )
       .slice(0, 10)
-      .map<StockWithWatchlistStatus>((item) => ({
+      .map((item) => ({
         symbol: item.symbol,
         name: item.description,
         type: item.type || 'Stock',

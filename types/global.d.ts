@@ -88,6 +88,7 @@ declare global {
         symbol: string;
         description: string;
         displaySymbol?: string;
+        exchange: string;
         type: string;
     };
 

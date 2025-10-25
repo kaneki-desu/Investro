@@ -1,13 +1,13 @@
 'use client';
 import useTradingViewWidget from '@/hooks/useTradingViewWidget';
 import { cn } from '@/lib/utils';
-import React, { useEffect, useRef, memo } from 'react';
+import React, {  memo } from 'react';
 
 interface TradingViewWidgetProps {
     title?:string;
     scriptUrl:string;
     config: Record<string, unknown>;
-    height?: Number;
+    height?: number;
     className?: string;
 }
 const TradingViewWidget = ({title, scriptUrl, config, height =600, className}: TradingViewWidgetProps) => {
