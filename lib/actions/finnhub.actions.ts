@@ -123,7 +123,7 @@ export const searchStocks=  cache(async(query: string) : Promise<StockWithWatchl
             name: data.symbol_info || "N/A",
             // logo: data.logo || null,
             type:  data.result_sub_type|| "Stock",
-            exchange: data.exchange || "BSE"
+            exchange:  "BSE"
           };
         } catch (error) {
           console.error(`Error fetching ${symbol}:`, error);
