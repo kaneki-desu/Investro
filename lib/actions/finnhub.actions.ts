@@ -22,6 +22,29 @@ async function fetchJSON<T>(url: string, revalidateSeconds?: number): Promise<T>
   return (await res.json() )as T;
 }
 
+async function fetchPOSTJSON<T>(url: string,body: Record<string, string>,  revalidateSeconds?: number): Promise<T> {
+  const options: RequestInit = revalidateSeconds
+    ? { next: { revalidate: revalidateSeconds }, cache: "force-cache" }
+    : { cache: "no-store" };
+
+  const res = await fetch(url, {
+    ...options,
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Accept: "*/*",
+    },
+    body: new URLSearchParams(body).toString(),
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`Fetch failed ${res.status}: ${text}`);
+  }
+
+  return (await res.json()) as T;
+}
+
 export async function getNews(symbols?: string[]) {
   try {
     const { from, to } = getDateRange(5);
@@ -92,15 +115,15 @@ export const searchStocks=  cache(async(query: string) : Promise<StockWithWatchl
       const results = await Promise.all(
       POPULAR_STOCK_SYMBOLS.map(async (symbol) => {
         try {
-          const url = `${FINNHUB_BASE_URL}/stock/profile2?symbol=${symbol}&token=${FINNHUB_API_KEY}`;
-          const data = await fetchJSON<{name:string,symbol:string,exchange:string}>(url, 3600); // revalidate every hour
-
+          const url = `https://www.nseindia.com/api/search/autocomplete?q=${symbol}`;
+          const res = await fetchJSON<{symbols:any[],mfsymbols:any[],search_content:any[]}>(url, 3600); // revalidate every hour
+          const data:StockSearchNSEResult=res.symbols[0];
           return {
             symbol,
-            name: data.name || "N/A",
+            name: data.symbol_info || "N/A",
             // logo: data.logo || null,
-            type: "Stock",
-            exchange: data.exchange || "N/A"
+            type:  data.result_sub_type|| "Stock",
+            exchange: data.exchange || "BSE"
           };
         } catch (error) {
           console.error(`Error fetching ${symbol}:`, error);
@@ -114,21 +137,18 @@ export const searchStocks=  cache(async(query: string) : Promise<StockWithWatchl
     }
 
     const url = `${FINNHUB_BASE_URL}/search?q=${encodeURIComponent(query)}&token=${FINNHUB_API_KEY}`;
-    const data = await fetchJSON<FinnhubSearchResponse>(url, 300);
-    const results = (data?.result || [])
-      .filter(
-        (item) =>
-          item.symbol &&
-          item.displaySymbol &&
-          item.description &&
-          !item.symbol.includes('.')
-      )
+    const data = await fetchPOSTJSON<{ results: any[] , stockList:any[], mfList:any[]}>(
+      "https://www.etmoney.com/api/stocks/global-search",
+      { query: query.trim() }
+    );
+
+      const results = (data?.stockList || [])
       .slice(0, 10)
       .map((item) => ({
-        symbol: item.symbol,
-        name: item.description,
+        symbol: item.label,
+        name: item.name,
         type: item.type || 'Stock',
-        exchange: item.exchange || 'N/A',
+        exchange: item.exchange || 'BSE',
         isInWatchlist: false,
       }));
 

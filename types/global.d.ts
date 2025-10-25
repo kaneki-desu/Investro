@@ -84,6 +84,22 @@ declare global {
         isInWatchlist: boolean;
     };
 
+    type SymbolSuggest = {
+      input: string;
+      weight: number;
+    };
+
+    type StockSearchNSEResult = {
+      symbol: string;
+      symbol_info: string;
+      symbol_suggest: SymbolSuggest[];
+      result_type: string;        // e.g., 'symbol'
+      result_sub_type: string;    // e.g., 'equity'
+      activeSeries: string[];     // e.g., ['EQ', 'T0']
+      listing_date: string;       // ISO date string
+      url: string;                // relative link
+    };
+
     type FinnhubSearchResult = {
         symbol: string;
         description: string;
