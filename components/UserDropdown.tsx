@@ -21,14 +21,16 @@ const UserDropdown = ({user , initialStocks}:{user: User, initialStocks:StockWit
     await signOut();
     router.push('/sign-in');
   }
+  console.log(user.name.split(" ").map(word => word.charAt(0).toUpperCase()).slice(0, 2).join(""));
   return (
     <DropdownMenu>
   <DropdownMenuTrigger asChild>
     <Button variant="ghost" className='flex items-center gap-3 text-gray-4 hover:text-yellow-500'>
       <Avatar className='w-8 h-8'>
-        <AvatarImage src="https://avatars.githubusercontent.com/u/148204596?v=4" alt="User Avatar" />
+        <AvatarImage src="" alt="User Avatar" />
         <AvatarFallback className='bg-yellow-500 text-yellow-900 text-sm font-bold'>
-          {user.name.charAt(0)}
+          {user.name.split(" ").map(word => word.charAt(0).toUpperCase()).slice(0, 2).join("")
+          } 
         </AvatarFallback>
       </Avatar>
       <div className="hidden md:flex flex-col items-start">
@@ -40,9 +42,9 @@ const UserDropdown = ({user , initialStocks}:{user: User, initialStocks:StockWit
     <DropdownMenuLabel>
       <div className="flex relative items-center gap-3 py-2">
       <Avatar className='w-8 h-10'>
-        <AvatarImage src="https://avatars.githubusercontent.com/u/148204596?v=4" alt="User Avatar" />
+        <AvatarImage src="" alt="User Avatar" />
         <AvatarFallback className='bg-yellow-500 text-yellow-900 text-sm font-bold'>
-          {user.name.charAt(0)}
+          {user.name.split(" ").map(word => word.charAt(0).toUpperCase()).slice(0, 2).join("")} 
         </AvatarFallback>
       </Avatar>
       <div className=" flex flex-col">
