@@ -149,20 +149,21 @@ declare global {
     };
 
     type WatchlistTableProps = {
-        watchlist: StockWithData[];
+        watchlistSym: StockWithData[];
     };
 
     type StockWithData = {
         userId: string;
         symbol: string;
         company: string;
-        addedAt: Date;
+        industryInfo: string;
         currentPrice?: number;
         changePercent?: number;
-        priceFormatted?: string;
-        changeFormatted?: string;
-        marketCap?: string;
-        peRatio?: string;
+        weekHigh?: number;
+        weekLow?: number;
+        marketCap?: number;
+        peRatio?: number;
+        recentNews?: object[];
     };
 
     type AlertsListProps = {

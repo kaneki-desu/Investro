@@ -8,7 +8,7 @@ const FINNHUB_BASE_URL = "https://finnhub.io/api/v1";
 const FINNHUB_API_KEY = process.env.NEXT_PUBLIC_FINNHUB_API_KEY!;
 
 // Generic fetch helper
-async function fetchJSON<T>(url: string, revalidateSeconds?: number): Promise<T> {
+export async function fetchJSON<T>(url: string, revalidateSeconds?: number): Promise<T> {
   const options: RequestInit = revalidateSeconds
     ? { next: { revalidate: revalidateSeconds }, cache: "force-cache" }
     : { cache: "no-store" };
@@ -113,7 +113,7 @@ export const searchStocks=  cache(async(query: string) : Promise<StockWithWatchl
   try {
     if (!query.trim()) {
       const results = await Promise.all(
-      POPULAR_STOCK_SYMBOLS.map(async (symbol) => {
+      POPULAR_STOCK_SYMBOLS.slice(0,10).map(async (symbol) => {
         try {
           const url = `https://www.nseindia.com/api/search/autocomplete?q=${symbol}`;
           const res = await fetchJSON<{symbols:any[],mfsymbols:any[],search_content:any[]}>(url, 3600); // revalidate every hour

@@ -3,19 +3,31 @@
 import { useState, useEffect} from 'react'
 import { CommandInput, CommandList, CommandEmpty,  CommandDialog } from "@/components/ui/command"
 import { Button } from './ui/button'
-import { Loader2, Star, TrendingUp } from 'lucide-react'
+import { Loader2, Star, ToggleRight, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import { useDebounce } from '@/hooks/useDebounce'
 import { searchStocks } from '@/lib/actions/finnhub.actions'
+import { addToWatchlist,  removeFromWatchlist } from '@/lib/actions/watchlist.actions'
+import { toast } from 'sonner'
+import { useUser } from '@/context/UserContext'
 
 export default function SearchCommand({renderAs='button', label='Add Stock', initialStocks}: SearchCommandProps ) {
   const [open, setOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [loading, setLoading] = useState(false)
   const [stocks, setStocks] = useState<StockWithWatchlistStatus[]>(initialStocks)
-
   const isSearchMode = !! searchTerm.trim();
   const displayStocks = isSearchMode? stocks: stocks?.slice(0,10) ;
+  const { watchlist, toggleStock } = useUser();
+  useEffect(() => {
+    console.log(watchlist);
+    setStocks(prev =>
+      prev.map(stock => ({
+        ...stock,
+        isInWatchlist: watchlist.includes(stock.symbol)
+      }))
+    );
+  }, [watchlist]);
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -27,6 +39,25 @@ export default function SearchCommand({renderAs='button', label='Add Stock', ini
     document.addEventListener('keydown', down)
     return () => document.removeEventListener('keydown', down)
   }, [])
+
+  const handleWatchlistToggle = async (stock: StockWithWatchlistStatus) => {
+    try {
+      if (stock.isInWatchlist) {
+        toggleStock(stock.symbol);
+      } else {
+        toggleStock(stock.symbol,stock.name);
+      }
+      // Update the stock's watchlist status in the local state
+      setStocks(prev => prev.map(s => 
+        s.symbol === stock.symbol 
+          ? { ...s, isInWatchlist: !s.isInWatchlist }
+          : s
+      ));
+    } catch (error) {
+      toast.error("Failed to update watchlist");
+      console.error("Watchlist update error:", error);
+    }
+  };
 
   const handleSearch = async()=>{
     if(!isSearchMode)return setStocks(initialStocks);
@@ -93,7 +124,16 @@ export default function SearchCommand({renderAs='button', label='Add Stock', ini
                                   {stock.symbol} | {stock.exchange} | {stock.type} 
                               </div>
                             </div>
-                            {/* <Star /> */}
+                            <button 
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                handleWatchlistToggle(stock);
+                              }}
+                              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"
+                            >
+                              <Star className={stock.isInWatchlist? "fill-yellow-400 text-yellow-400" : "text-gray-400"} />
+                            </button>
                         </Link>
                     </li>
                 ))}

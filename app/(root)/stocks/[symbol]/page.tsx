@@ -1,5 +1,6 @@
 import TradingViewWidget from "@/components/TradingViewWidgets";
 import WatchlistButton from "@/components/WatchListButton";
+import { isSymInWatchlist } from "@/lib/actions/watchlist.actions";
 import {
   SYMBOL_INFO_WIDGET_CONFIG,
   CANDLE_CHART_WIDGET_CONFIG,
@@ -13,7 +14,8 @@ export default async function StockDetails({ params }: StockDetailsPageProps) {
   const { symbol } = await params;
   const symBse="BSE:"+symbol.toUpperCase() ;
   const scriptUrl = `https://s3.tradingview.com/external-embedding/embed-widget-`;
-  console.log("Rendering StockDetails for symbol:", symbol);
+  const isInWatchlist = await isSymInWatchlist(symbol); // Placeholder for actual watchlist status
+  console.log("Rendering StockDetails for symbol:", symbol , isInWatchlist);
   return (
     <div className="flex min-h-screen p-4 md:p-6 lg:p-8">
       <section className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
@@ -43,9 +45,8 @@ export default async function StockDetails({ params }: StockDetailsPageProps) {
         {/* Right column */}
         <div className="flex flex-col gap-6">
           <div className="flex items-center justify-between">
-            <WatchlistButton symbol={symBse.toUpperCase()} company={symBse.toUpperCase()} isInWatchlist={false} />
+            <WatchlistButton symbol={symbol.toUpperCase()} company={symbol.toUpperCase()} isInWatchlist={isInWatchlist} />
           </div>
-
           <TradingViewWidget
             scriptUrl={`${scriptUrl}technical-analysis.js`}
             config={TECHNICAL_ANALYSIS_WIDGET_CONFIG(symBse)}
