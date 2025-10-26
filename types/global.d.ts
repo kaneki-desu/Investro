@@ -171,20 +171,21 @@ declare global {
     };
 
     type MarketNewsArticle = {
-        id: number;
-        headline: string;
-        summary: string;
-        source: string;
-        url: string;
-        datetime: number;
-        category: string;
-        related: string;
-        image?: string;
+      id: number | string;
+      headline: string;
+      intro: string;
+      date: string | number;
+      url: string;
+      section: string;
+      image?: string;
+      byline?: string;
+      premiumStory?: string;
+      timeToRead?: string;
     };
 
-    type WatchlistNewsProps = {
-        news?: MarketNewsArticle[];
-    };
+    interface WatchlistNewsProps {
+      newsMap: Record<string, MarketNewsArticle[]>;
+    }
 
     type SearchCommandProps = {
         open?: boolean;

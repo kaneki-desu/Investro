@@ -4,47 +4,49 @@ import { WATCHLIST_TABLE_HEADER } from "@/lib/constants";
 import WatchlistButton from "./WatchListButton";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { TrendingUp, Loader2 } from "lucide-react";
+import { TrendingUp } from "lucide-react"; // Loader2 is no longer needed
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { useSearchParams } from "next/navigation";
-import { getWatchListInfo } from "@/lib/actions/watchlist.actions";
+// Import the types directly // Adjust path as needed
 
-export default function WatchlistTable({ watchlistSym }: { watchlistSym: string[] }) {
-  const [removeSymbol, setRemoveSymbol] = useState<string | null>(null);
-  const [watchlist, setWatchList] = useState<StockWithData[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+// 1. Update props: Receive 'watchlistData' instead of symbols and callbacks
+interface WatchlistTableProps {
+  watchlistData: StockWithData[];
+}
+
+export default function WatchlistTable({ watchlistData }: WatchlistTableProps) {
+  // 2. Local state is now for managing the *displayed* list,
+  // initialized by the props.
+  const [watchlist, setWatchList] = useState<StockWithData[]>(watchlistData);
+  
+  // 3. Remove all loading state
   const router = useRouter();
   const searchParams = useSearchParams();
   const showAlert = searchParams.get('showAlert') === 'true';
 
+  // 4. Remove the data-fetching useEffect.
+  // We add a new, simpler one to sync props to state
+  // in case the parent data ever re-fetches.
   useEffect(() => {
-    (async () => {
-      setLoading(true);
-      try {
-        const watchlistSy = await getWatchListInfo(watchlistSym);
-        setWatchList(watchlistSy || []);
-      } catch (error) {
-        console.error("Error fetching watchlist:", error);
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [watchlistSym]);
+    setWatchList(watchlistData);
+  }, [watchlistData]);
 
+
+  // 5. Update handler to filter the local state for instant UI feedback
   const handleWatchlistChange = (symbol: string, isAdded: boolean) => {
-    if (!isAdded) setRemoveSymbol(symbol);
+    if (!isAdded) {
+      // Remove the stock from the local state to update the UI
+      setWatchList((currentWatchlist) =>
+        currentWatchlist.filter(stock => stock.symbol !== symbol)
+      );
+    }
   };
 
-  if (loading) {
-    return (
-      <div className="bg-gray-800/50 rounded-lg p-8 text-center flex flex-col items-center justify-center">
-        <Loader2 className="animate-spin h-8 w-8 mb-4 text-yellow-400" />
-        <p className="text-gray-400">Loading your watchlist...</p>
-      </div>
-    );
-  }
+  // 6. Remove the 'loading' return block.
+  // Suspense on the page.tsx handles this.
 
+  // 7. Update the empty check to use the 'watchlist' state.
   if (!watchlist || watchlist.length === 0) {
     return (
       <div className="bg-gray-800/50 rounded-lg p-8 text-center">
@@ -57,6 +59,8 @@ export default function WatchlistTable({ watchlistSym }: { watchlistSym: string[
     );
   }
 
+  // 8. The rest of the return logic (the table) is unchanged
+  // as it already maps over the 'watchlist' state variable.
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm text-left text-gray-300">
